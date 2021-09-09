@@ -4,6 +4,13 @@
 const Model = use('Model')
 
 class Reply extends Model {
+    tweet () {
+        return this.belongsTo ('App/Models/Tweet')
+    }
+
+    user () {
+        return this.belongsTo ('App/Models/User')
+    }
 }
 
 module.exports = Reply
