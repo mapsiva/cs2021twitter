@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +16,6 @@
 
 // Factory.blueprint('App/Models/User', (faker) => {
 //   return {
-//     username: faker.username()
+//     username: faker.username(),
 //   }
 // })
