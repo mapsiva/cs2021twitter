@@ -5,7 +5,8 @@
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const User = use("App/Models/User");
-
+const Tweet = use("App/Models/Tweet");
+const Hash = use("Hash");
 /**
  * Resourceful controller for interacting with users
  */
@@ -161,6 +162,113 @@ class UserController {
         message: "Não foi possível atualizar o seu perfil!",
       });
     }
+  }
+
+  async timeline({ auth, response }) {
+    const user = await User.find(auth.current.user.id);
+    const followingIds = await user.following().ids();
+
+    followingIds.push(user.id);
+
+    const tweets = await Tweet.query()
+      .whereIn("user_id", followingIds)
+      .with("user")
+      .with("favorites")
+      .with("replies")
+      .fetch();
+
+    return response.json({
+      status: "success",
+      data: tweets,
+    });
+  }
+
+  async me({ auth, response }) {
+    try {
+      const user = await User.query()
+        .where("id", auth.current.user.id)
+        .with("tweets", (builder) => {
+          builder.with("user");
+          builder.with("favorites");
+          builder.with("replies");
+        })
+        .with("following")
+        .with("followers")
+        .with("favorites")
+        .with("favorites.tweet", (builder) => {
+          builder.with("user");
+          builder.with("favorites");
+          builder.with("replies");
+        })
+        .firstOrFail();
+
+      return response.json({
+        status: "success",
+        data: user,
+      });
+    } catch (error) {
+      return response.status(404).json({
+        status: "error",
+        message: "Não foi possível mostrar o seu profile!",
+      });
+    }
+  }
+
+  // http://localhost:3333/:username
+  async showProfile({ response, params }) {
+    try {
+      const user = await User.query()
+        .where("id", params.username)
+        .with("tweets", (builder) => {
+          builder.with("user");
+          builder.with("favorites");
+          builder.with("replies");
+        })
+        .with("following")
+        .with("followers")
+        .with("favorites")
+        .with("favorites.tweet", (builder) => {
+          builder.with("user");
+          builder.with("favorites");
+          builder.with("replies");
+        })
+        .firstOrFail();
+
+      return response.json({
+        status: "success",
+        data: user,
+      });
+    } catch (error) {
+      return response.status(404).json({
+        status: "error",
+        message: "Não foi possível mostrar o seu profile!",
+      });
+    }
+  }
+
+  async changePassword({ auth, response, request }) {
+    const user = auth.current.user;
+
+    const currentPassword = request.input("password");
+
+    const verifyPassword = await Hash.verify(currentPassword, user.password);
+
+    if (!verifyPassword) {
+      return response.status(401).json({
+        status: "error",
+        message: "Senha atual não confere!",
+      });
+    }
+
+    const newPassword = request.input("newPassword");
+
+    user.password = await Hash.make(newPassword);
+    await user.save();
+
+    return response.json({
+      status: "success",
+      message: "Senha atualizada com sucesso!",
+    });
   }
 
   /**

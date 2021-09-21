@@ -23,8 +23,19 @@ Route.get("/", () => {
 Route.post("/login", "UserController.login");
 Route.post("/users", "UserController.signup");
 
+// account
+Route.group(() => {
+  Route.get("/me", "UserController.me");
+  Route.put("/update_profile", "UserController.updateProfile");
+  Route.put("/change_password", "UserController.changePassword");
+}).middleware(["auth"]);
+
+// Timeline
+Route.group(() => {
+  Route.get("/timeline", "UserController.timeline");
+}).middleware(["auth"]);
+
 Route.group(() => {
   Route.put("/users", "UserController.update");
-  Route.put("/profile", "UserController.updateProfile");
   Route.get("/users", "UserController.index");
 }).middleware(["auth"]);
