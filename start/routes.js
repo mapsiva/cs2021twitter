@@ -39,3 +39,13 @@ Route.group(() => {
   Route.put("/users", "UserController.update");
   Route.get("/users", "UserController.index");
 }).middleware(["auth"]);
+
+// rotas para gerenciar tweets
+Route.group(() => {
+  Route.post("/tweet", "TweetController.tweet");
+  Route.get("/tweets/:id", "TweetController.show");
+  Route.delete("/tweets/destroy/:id", "TweetController.destroy");
+  Route.post("/tweets/reply/:id", "TweetController.reply");
+}).middleware(["auth"]);
+
+Route.get(":username", "UserController.showProfile");
