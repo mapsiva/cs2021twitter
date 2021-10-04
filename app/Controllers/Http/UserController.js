@@ -296,6 +296,32 @@ class UserController {
       });
     }
   }
+
+  async follow({ auth, request, response }) {
+    const user = auth.current.user; // sou eu
+
+    await user.following().attach(request.input("user_id"));
+
+    // EU -> user_id
+
+    return response.json({
+      status: "success",
+      message: "Você seguiu o usuário com sucesso!",
+      data: null,
+    });
+  }
+
+  async unFollow({ params, auth, response }) {
+    const user = auth.current.user; // sou eu
+
+    await user.following().detach(params.id);
+
+    return response.json({
+      status: "success",
+      message: "Você deixou de seguir o usuário com sucesso!",
+      data: null,
+    });
+  }
 }
 
 module.exports = UserController;

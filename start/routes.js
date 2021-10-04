@@ -23,29 +23,39 @@ Route.get("/", () => {
 Route.post("/login", "UserController.login");
 Route.post("/users", "UserController.signup");
 
-// account
+// account http://facom.ufms.br/account/change_password
 Route.group(() => {
   Route.get("/me", "UserController.me");
   Route.put("/update_profile", "UserController.updateProfile");
   Route.put("/change_password", "UserController.changePassword");
-}).middleware(["auth"]);
+})
+  .prefix("account")
+  .middleware(["auth"]);
 
-// Timeline
+// account http://facom.ufms.br/users/follow
 Route.group(() => {
   Route.get("/timeline", "UserController.timeline");
-}).middleware(["auth"]);
-
-Route.group(() => {
   Route.put("/users", "UserController.update");
   Route.get("/users", "UserController.index");
-}).middleware(["auth"]);
+  Route.post("/follow", "UserController.follow");
+  Route.delete("/unfollow/:id", "UserController.unFollow");
+})
+  .prefix("users")
+  .middleware(["auth"]);
 
-// rotas para gerenciar tweets
 Route.group(() => {
   Route.post("/tweet", "TweetController.tweet");
   Route.get("/tweets/:id", "TweetController.show");
   Route.delete("/tweets/destroy/:id", "TweetController.destroy");
   Route.post("/tweets/reply/:id", "TweetController.reply");
 }).middleware(["auth"]);
+
+// gerenciar Favoritos
+Route.group(() => {
+  Route.post("/create", "FavoriteController.favorite");
+  Route.delete("/destroy/:id", "FavoriteController.unFavorite");
+})
+  .prefix("favorites")
+  .middleware(["auth"]);
 
 Route.get(":username", "UserController.showProfile");
